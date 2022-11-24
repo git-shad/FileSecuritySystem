@@ -172,13 +172,13 @@ public class FileSecuritySystem extends CryptoFile{ //this is a main class
 		switch(mode) {
 		case 1:
 			progress.textProcess = "Encrypting...";
-			progress.textStop= "  success encryption process!";
 			break;
 		case 2:
 			progress.textProcess = "Decrypting...";
-			progress.textStop= "  success decryption process!";
 			break;
 		}
+        
+        progress.textStop= "  success process!";
 		progress.speed = 10;
 		progress.start();
 		show.write("\n");

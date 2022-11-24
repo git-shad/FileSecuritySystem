@@ -8,7 +8,7 @@ public class CryptoFile extends FunctionShort{
     private final static String ALGORITHM = "AES";
     private final static String TRANSFORMATION = "AES/ECB/PKCS5PADDING";
     private final static String passKey = "PasswordFile";
-    private final static String ext = ".se$";//secured by encryption
+    //private final static String ext = ".se$";//secured by encryption
     private static String getCryptFileFullPath = "null";//if not change, default file name is null
     
     static FunctionShort show = new FunctionShort();

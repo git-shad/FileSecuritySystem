@@ -1,0 +1,3 @@
+win10-ansi application is for enabling ansi in windows. 
+if you have problem for Win10-ANSI.exe explore this site
+https://github.com/git-shad/Win10-ANSI 
