@@ -1,55 +1,66 @@
 package FileSecurity;
 
 import java.io.*;
+import java.nio.file.Paths;
 import java.security.*;
 import java.util.*;
 import javax.crypto.*;
 import javax.crypto.spec.*;
 
-public class FSSystem {
-	public static FunctionShort con = FunctionShort.startOfExecuted();
-	public static ThreadProgress progress = null;
-	public static File file = null;
+public class FSSystem {//File Security System
+	static BufferedReader bufread = new BufferedReader(new InputStreamReader(System.in));
+	static FunctionShort show = FunctionShort.startOfExecuted();
+	static ThreadProgress progress = null;
+	static File file = null;
 	
 	//--------------------------------------
 	static class CryptoFile{
 		private final static String ALGORITHM = "AES";
 		private final static String TRANSFORMATION = "AES/ECB/PKCS5PADDING";
 		private final static String passKey = "PasswordFile";
+		private final static String ext = ".se$";//secured by encryption
+		private static String getCryptFileFullPath = "null";//if not change, default file name is null
 		
-		public static void fileSecurity(int cipherMode,String filePath){
+		public static File fileSecurity(int cipherMode,String filePath){
 			File fileOperate = new File(filePath);
 			
-			cryptoFile(cipherMode,fileOperate,new File(filePath));
+			cryptoFile(cipherMode,fileOperate,fileOperate);
+			return new File(getCryptFileFullPath);
 		}
 		
 		private static void cryptoFile(int cripherMode,File inputFile,File outputFile){
 			try {
+				//create secret key
 				MessageDigest sha = MessageDigest.getInstance("SHA-1");
 				byte[] key = passKey.getBytes("UTF-8");
 					   key = sha.digest(key);
 					   key = Arrays.copyOf(key, 16);
+				//--------------------------
 				
 				Key secretKey = new SecretKeySpec(key,ALGORITHM);
-				Cipher cipher = Cipher.getInstance(TRANSFORMATION);
-				cipher.init(cripherMode, secretKey);
+				Cipher cripher = Cipher.getInstance(TRANSFORMATION);
 				
 				FileInputStream inputStream = new FileInputStream(inputFile);
 				byte []inputBytes = new byte[(int)inputFile.length()];
 				inputStream.read(inputBytes);
-				byte []outputBytes = cipher.doFinal(inputBytes);
+				cripher.init(cripherMode, secretKey);
+				
 				FileOutputStream outputStream = new FileOutputStream(outputFile);
-				outputStream.write(outputBytes);
+				byte[] out = cripher.doFinal(inputBytes);
+				outputStream.write(out);
 				
 				inputStream.close();
 				outputStream.close();
+				getCryptFileFullPath = outputFile.getAbsolutePath();
 			} catch(NoSuchAlgorithmException  | 
 					NoSuchPaddingException    | 
 					InvalidKeyException       | 
 					IOException               | 
 					IllegalBlockSizeException | 
-					BadPaddingException e) {
-				con.write("\033[1B\r\033[0K"+e.getMessage()+"\033[1A");
+					BadPaddingException 	  | 
+					OutOfMemoryError e) {
+				show.write("From: "+inputFile.getAbsolutePath()+"\r\033[2k\n"
+						+ "  Error: "+e.getMessage()+"\r\n");
 			}
 		}
 	}
@@ -112,41 +123,45 @@ public class FSSystem {
 					  textStop = "done!";
 		private boolean exit = false;
 		
-		private FunctionShort con = new FunctionShort();
+		private FunctionShort show = new FunctionShort();
 		@Override
 		public void run() {
 			try {
 				int tmp = this.lenght - 1;
-				boolean cond = true;
+				boolean showd = true;
+				
 				while(!exit) {
-					
+ 					//create progress string
 					String open = textProcess + " [",
 						   right = "",
-						   icon = "<-=->",
+						   ishow = "<-=->",
 						   left = "",
 						   close = "]";
 					
 					for(int i = 0; i < lenght - tmp;++i) {
 						right +=  " ";
 					}
-					open += right + icon;
+					open += right + ishow;
 					for(int i = 0; i < tmp ;++i) {
 						left += " ";
 					}
 					open += left + close;
-					con.write(open + "\033[38;5;214m\r\b");
+					//end create progress
 					
-					if(cond) {
+					show.write(open + "\033[38;5;214m\r\b");//reset and show
+					
+					//move animation
+					if(showd) {
 						--tmp;
 						if(tmp == 0) {
-							cond = false;
+							showd = false;
 						}
 					}else {
 						++tmp;
 						if(tmp == lenght) {
-							cond = true;
+							showd = true;
 						}
-					}
+					}//----
 					Thread.sleep(speed);
 				}
 				
@@ -157,21 +172,21 @@ public class FSSystem {
 		
 		public void _stop() {
 			this.exit = true;
-			con.write("\n\033[0m    "+textStop+"\033[0m");
+			show.write("\n\033[0m    "+textStop+"\033[0m");
 		}
 		
 	}
 	//--------------------------------------
 	
-	private static void printBanner(FunctionShort con) {
-		
-		con.write("\033[38;5;44m"
-				+ " ███████╗██╗██╗     ███████╗                                         \r\n"
-				+ " ██╔════╝██║██║     ██╔════╝                                         \r\n"
-				+ " █████╗  ██║██║     █████╗                                           \r\n"
-				+ " ██╔══╝  ██║██║     ██╔══╝                                           \r\n"
-				+ " ██║     ██║███████╗███████╗                                         \r\n"
-				+ " ╚═╝     ╚═╝╚══════╝╚══════╝ \033[38;5;27mMR.SHAD | 228025\033[38;5;44m\r\n"
+	private static void printBanner(FunctionShort show) {
+		show.cls();
+		show.write("\033[38;5;44m\n"
+				+ "                  ███████╗██╗██╗     ███████╗                        \r\n"
+				+ "                  ██╔════╝██║██║     ██╔════╝                        \r\n"
+				+ "                  █████╗  ██║██║     █████╗                          \r\n"
+				+ "                  ██╔══╝  ██║██║     ██╔══╝                          \r\n"
+				+ "                  ██║     ██║███████╗███████╗                        \r\n"
+				+ "                  ╚═╝     ╚═╝╚══════╝╚══════╝ \033[38;5;27mMR.SHAD | 228025\033[38;5;44m\r\n"
 				+ "                                                                     \r\n" 
 				+ " ███████╗███████╗ ██████╗██╗   ██╗██████╗ ██╗████████╗██╗   ██╗██╗██╗\r\n"
 				+ " ██╔════╝██╔════╝██╔════╝██║   ██║██╔══██╗██║╚══██╔══╝╚██╗ ██╔╝██║██║\r\n"
@@ -181,7 +196,8 @@ public class FSSystem {
 				+ " ╚══════╝╚══════╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝   ╚═╝      ╚═╝   ╚═╝╚═╝\r\n"
 				+ "                                                \033[38;5;27mconsole application\033[38;5;44m\r\n"
 				+ "══════════════════════════════════════════════════════════════════════\033[0m\r\n");
-		con.write("\033[?25l");
+		show.writeln("\033[?25l"
+				 + " native dir : " + (new File("").getAbsolutePath()));
 		
 	}
 	
@@ -201,13 +217,19 @@ public class FSSystem {
 		int issue = 0;
 		String []paths = new String[(int)file.length()];//limit
 		
-		for(File f: file.listFiles()) {//get fullname
-			if(f.isFile()) {
-				paths[n++] = f.getAbsolutePath();
-			}else {
-				++issue;
+		try {
+			for(File f: file.listFiles()) {//get fullname
+				if(f.isFile()) {
+					paths[n++] = f.getAbsolutePath();
+				}else {
+					++issue;
+				}
+				Thread.sleep(21);
 			}
-			Thread.sleep(21);
+		}catch(NullPointerException e) {
+			if(file.isFile()) {
+				paths[n] = file.getAbsolutePath();
+			}
 		}
 		
 		progress._stop();
@@ -216,37 +238,41 @@ public class FSSystem {
 			if(path == null) {
 				break;
 			}
-			con.write("\r\033[0K\033[38;5;47m"+path);
+			show.write("\r\033[0K\033[38;5;47m"+path);
 			Thread.sleep(10);
-		}con.write("\033[38;5;45m\r\033[0K [ count file issue's ] : "+issue+"\n [ over all file ] : "+(n+1)+"\033[0m\n");
+		}show.write("\033[38;5;45m\r\033[0K [ count file issue's ] : "+issue+"\n [ over all file ] : "+(n+1)+"\033[0m\n");
 		
 		return paths;
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		BufferedReader bufread = new BufferedReader(new InputStreamReader(System.in));
-	    con.cls();
-		printBanner(con);
+		printBanner(show);
+		
 		while(run) {//run true because it is continuing code
 			
-			con.write("\n path : ");
+			show.write("\n path : ");
 			String inp = bufread.readLine();//get directory nor file
+			
+			file = Paths.get(inp).toFile();
 			
 			if(inp.equalsIgnoreCase("exit")) {//if you want to exit this program
 				run = false;//stop loops
 				exit();
-			}else {
-				file = new File(inp);
-				if(file.exists()) {//test if exists file
-					if(file.isFile()) {//test if it file 
-						fileOperate(checkFileInfo(file));
-					}else if(file.isDirectory()) {//else if is directory
-						fileOperate(checkFileInfo(file));
-					}//end
-				}else {
-					con.write("\033[38;5;196merror message:\033[38;5;198m can't identify if file or director is!\033[0m\n");//message error
-				}//end
 			}
+			
+			if(file.exists()) {//test if exists file
+				if(file.isFile()) {//test if it file 
+				
+					fileOperate(checkFileInfo(file));
+				}else if(file.isDirectory()) {//else if is directory
+				
+					fileOperate(checkFileInfo(file));
+				}//end
+			}else {
+				show.write("\033[38;5;196merror message:\033[38;5;198m can't identify if file or director is!\033[0m\n");//message error
+			}//end
+				
+			
 		}
 	}
 	
@@ -255,15 +281,14 @@ public class FSSystem {
 		int n0 = 0,n1 = 0, inp = 0, mode = 0;
 		String tmp = "";
 		boolean bool = true;
-		BufferedReader bufread = new BufferedReader(new InputStreamReader(System.in));
 		
 		while(true) {
-			con.write
-			("\n\t[1] "+color[n0]+"Encrypt File"+color[0]+"\r\n"
-			+"\t[2] "+color[n1]+"Decrypt File"+color[0]+"\r\n"
+			show.write
+			("\n\t[1] "+color[n0]+"Lock File"+color[0]+"\r\n"
+			+"\t[2] "+color[n1]+"UnLock File"+color[0]+"\r\n"
 			+"\n     -----------------------\r\n");
 			if(bool) {
-				con.write("\tnum : ");
+				show.write("\tnum : ");
 				try {
 					inp = Integer.parseInt(bufread.readLine().toCharArray()[0]+"");//get first char in string and convert it to integer
 					
@@ -281,25 +306,26 @@ public class FSSystem {
 				}catch(Exception e) {
 					//ignored
 				}
-				con.write("\r\033[7A");
+				show.write("\r\033[6A");
 			}else {
 				bool = !bool;
-				con.write("\n");
+				show.write("\n");
+				
 				while(bool) {
-					con.write("  permission to contiue this opetation [Y/n]: ");
+					show.write("  permission to showtiue this opetation [Y/n]: ");
 					try {
 						tmp = bufread.readLine().toCharArray()[0]+"";
 						
 						if(tmp.equalsIgnoreCase("y")){
 							bool = !bool;//kill 2 while's
 						}else {
-							con.write("\r\033[8A");
+							show.write("\r\033[7A");
 							break;//kill parent while
 						}
 					}catch(Exception e) {
 						//ignored
 					}
-					con.write("\r\033[1A");
+					show.write("\r\033[1A");
 				}
 				if(!bool) {
 					break;
@@ -321,16 +347,22 @@ public class FSSystem {
 		}
 		progress.speed = 10;
 		progress.start();
-		con.write("\n");
+		show.write("\n");
 		Thread.sleep(20);//wait 20 milisec for refreshing
+		List<String> list = new LinkedList<String>();//collect file 
 		for(String path: paths) {
 			if(path == null) {
 				break;
 			}
 			Thread.sleep(10);
-			CryptoFile.fileSecurity(mode, path);
+			file = CryptoFile.fileSecurity(mode, path);
+			
+			if(file.exists() && list.add(file.getAbsolutePath())) {
+				continue;
+			}
 		}
 		progress._stop();
+		
 	}//end fileOpetion
 }
 
